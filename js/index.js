@@ -13,7 +13,9 @@ const {
     World,
 } = Matter;
 
-// select buttons
+// selectors
+
+const bannerText = document.querySelector('#bannertext');
 const newButton = document.querySelector('#new');
 const harderButton = document.querySelector('#harder');
 const fasterButton = document.querySelector('#faster');
@@ -21,8 +23,15 @@ const scoreButton = document.querySelector('#score');
 const closeButton = document.querySelector('.closebutton');
 closeButton.addEventListener('click', () => {
     winBox.classList.add('hidden');
-
 });
+
+bannerText.innerText = "W A S D => MOVE";
+setTimeout(() => {
+    bannerText.innerText = `|||||| MAZE MALAISE ||||||`;
+    return;
+}, 5000);
+
+
 
 
 const wallStroke = "#fff";
