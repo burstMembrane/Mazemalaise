@@ -365,7 +365,7 @@ harderButton.addEventListener('click', makeHarder);
 fasterButton.addEventListener('click', () => {
     if(ballVelocity < 6) { ballVelocity = (ballVelocity + 1) % 6; }
     if(ballVelocity == 0) { ballVelocity = 1 }
-    fasterButton.innerText = `VELOCITY ${ballVelocity}`;
+    fasterButton.innerText = `SPEED: ${ballVelocity}`;
 });
 
 closeButton.addEventListener('click', () => {
