@@ -1,103 +1,3 @@
-// ========= //
-// MAZE GAME //
-// ========= //
-
-// destructure functions out of Matter object
-const {
-    Engine,
-    Render,
-    Body,
-    Bodies,
-    Events,
-    Runner,
-    World,
-} = Matter;
-
-// selectors
-
-const bannerText = document.querySelector('#bannertext');
-const newButton = document.querySelector('#new');
-const harderButton = document.querySelector('#harder');
-const fasterButton = document.querySelector('#faster');
-const scoreButton = document.querySelector('#score');
-const closeButton = document.querySelector('.closebutton');
-closeButton.addEventListener('click', () => {
-    winBox.classList.add('hidden');
-});
-
-bannerText.innerText = "W A S D => MOVE";
-setTimeout(() => {
-    bannerText.innerText = `|||||| MAZE MALAISE ||||||`;
-    return;
-}, 5000);
-
-
-
-
-const wallStroke = "#fff";
-const wallFill = "#000";
-const wallStrokeWidth = 2;
-const wallWidth = 5;
-
-const ballStroke = "#f00";
-const ballFill = "#000";
-const ballStrokeWidth = 2;
-
-const goalStroke = "#0f0";
-const goalFill = "#000";
-const goalStrokeWidth = 1;
-
-
-//  create engine variable
-const engine = Engine.create();
-engine.world.gravity.y = 0;
-engine.world.gravity.x = 0;
-
-const matterCanvas = document.querySelector('#matterCanvas');
-
-// destructure world from engine object
-const { world } = engine;
-
-// init renderer
-const render = Render.create({
-    canvas: matterCanvas,
-    engine: engine,
-    options: {
-        wireframes: false,
-        width: 800,
-        height: 800,
-        background: 'rgb(15,15,19)'
-
-    }
-});
-
-
-
-// select canvas
-cnv = document.querySelector('canvas');
-winBox = document.querySelector('.winner');
-
-const config = {
-    width: cnv.width,
-    height: cnv.height,
-    cellsHorizontal: 4,
-    cellsVertical: 4,
-    get unitLengthX() { return this.width / this.cellsHorizontal },
-    get unitLengthY() { return this.height / this.cellsVertical },
-
-}
-
-let { width, height, cellsHorizontal, cellsVertical, unitLengthX, unitLengthY } = config;
-
-
-let hasWon = false;
-let userScore = 0;
-
-
-// start renderer
-Render.run(render);
-Runner.run(Runner.create(), engine);
-
 // =============== //
 // WALL GENERATION //
 // =============== //
@@ -134,6 +34,8 @@ const shuffle = (arr) => {
     return arr;
 };
 
+
+
 const newMaze = () => {
 
     const grid = Array(cellsVertical).fill(null)
@@ -147,10 +49,6 @@ const newMaze = () => {
     // 3 horizontals, 2 verticals
     const horizontals = Array(cellsVertical - 1).fill(null)
         .map(() => Array(cellsHorizontal).fill(false));
-
-
-
-
     const startRow = Math.floor(Math.random() * cellsVertical);
     const startColumn = Math.floor(Math.random() * cellsHorizontal);
 
@@ -170,8 +68,6 @@ const newMaze = () => {
         });
 
     });
-
-
 
     verticals.forEach((row, rowIndex) => {
         row.forEach((open, columnIndex) => {
@@ -209,9 +105,7 @@ const findGoal = () => {
     }
 }
 
-const rotateBody = (body) => {
-    Body.rotate(body, Math.PI / 128);
-}
+
 const stepThoughCell = (row, column, grid, horizontals, verticals) => {
     // if I have visited cell at [row,column], then return
     if(grid[row][column]) { return; }
@@ -257,9 +151,67 @@ const stepThoughCell = (row, column, grid, horizontals, verticals) => {
     }
     // call function again until finished
 };
-let ballVelocity = 1;
 
-const addSprites = () => {
+
+
+// GAME UTILITY FUNCTIONS //
+
+// allow mouse control
+const addMouseControl = () => {
+    // add mouse control
+
+
+}
+
+const logForTenSeconds = (data) => {
+
+
+    const logInterval = setInterval(() => {
+        console.log(data);
+    }, 10000);
+
+    setTimeout(() => {
+
+        clearInterval(logInterval);
+    })
+
+
+}
+addMouseControl();
+
+
+const flashWall = (wall) => {
+
+
+    wall.render.strokeStyle = 'red';
+    setTimeout(() => {
+        wall.render.strokeStyle = wallStroke;
+    }, 100);
+
+}
+
+
+
+// detect collision event with goal
+Events.on(engine, 'collisionStart', event => {
+    event.pairs.forEach((collision) => {
+        const labels = ['Ball', 'Goal'];
+        const wallCollision = ['Ball', 'Wall'];
+        if(wallCollision.includes(collision.bodyA.label) && wallCollision.includes(collision.bodyB.label)) {
+
+            flashWall(collision.bodyA);
+
+        }
+        // if collision with goal
+        if(labels.includes(collision.bodyA.label) && labels.includes(collision.bodyB.label) && !hasWon) {
+
+            onWin();
+        }
+    });
+});
+
+
+const initBall = () => {
     const goal = Bodies.rectangle(
         width - unitLengthX / 2, height - unitLengthY / 2, unitLengthX * 0.5, unitLengthX * 0.5, {
             isStatic: true,
@@ -270,6 +222,7 @@ const addSprites = () => {
     World.add(world, goal);
     const ball = Bodies.circle(unitLengthX / 2, unitLengthY / 2, unitLengthX / 4, { restitution: 0.5, label: "Ball", render: { fillStyle: ballFill, strokeStyle: ballStroke, lineWidth: ballStrokeWidth } });
     World.add(world, ball);
+
 
 
 
@@ -299,6 +252,11 @@ const addSprites = () => {
 }
 
 let isFlashing = false;
+
+const rotateBody = (body) => {
+    Body.rotate(body, Math.PI / 128);
+}
+
 const updateScore = (score) => {
     scoreButton.innerText = `SCORE: ${score}`;
 }
@@ -310,9 +268,9 @@ const onWin = () => {
 
     engine.world.gravity.y = 0.005;
     world.bodies.forEach((body) => {
+
+        // FLASH GOAL ON COLLISION
         if(body.label === 'Goal') {
-
-
             var flashInterval = setInterval(() => {
                 isFlashing = !isFlashing;
                 if(isFlashing) {
@@ -322,7 +280,6 @@ const onWin = () => {
                 }
             }, 250);
             setTimeout(() => {
-
                 clearInterval(flashInterval);
             }, 5000);
         }
@@ -337,18 +294,6 @@ const onWin = () => {
 
 }
 
-
-// detect collision event with goal
-Events.on(engine, 'collisionStart', event => {
-    event.pairs.forEach((collision) => {
-        const labels = ['Ball', 'Goal'];
-
-        if(labels.includes(collision.bodyA.label) && labels.includes(collision.bodyB.label) && !hasWon) {
-
-            onWin();
-        }
-    });
-});
 
 const randWinText = () => {
 
@@ -367,14 +312,12 @@ const randWinText = () => {
 }
 
 const reset = () => {
-
-
     hasWon = false;
     winBox.classList.add('hidden');
     World.clear(world, false);
     makeWalls(cnv.width, cnv.height);
     newMaze();
-    addSprites();
+    initBall();
     let foundGoal = findGoal();
 
     setInterval(() => {
@@ -395,16 +338,34 @@ const makeHarder = () => {
 
     console.log(cellsHorizontal, cellsVertical);
     reset();
-}
+};
+
+
+// =============== 
+// EVENT LISTENERS 
+// =============== 
+
+
 newButton.addEventListener('click', reset);
 harderButton.addEventListener('click', makeHarder);
 fasterButton.addEventListener('click', () => {
-
     if(ballVelocity < 5) { ballVelocity = (ballVelocity + 1) % 5; }
-
-
     fasterButton.innerText = `VELOCITY ${ballVelocity}`;
-})
+});
+
+closeButton.addEventListener('click', () => {
+    winBox.classList.add('hidden');
+});
+
+// SHOW INSTRUCTIONS
+bannerText.innerText = "W A S D >> MOVE";
+
+setTimeout(() => {
+    bannerText.innerText = ` MAZE MALAISE `;
+    return;
+}, 5000);
+
+
 
 // make the walls
 updateScore(0);
