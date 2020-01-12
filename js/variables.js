@@ -33,7 +33,8 @@ const goalStrokeWidth = 1;
 let hasWon = false;
 let userScore = 0;
 let ballVelocity = 1;
-
+let difficulties = ['EASY', 'NORMAL', 'HARD', 'HARDER', 'OVERLOAD'];
+let currDifficulty = 1;
 //  create engine variable
 const engine = Engine.create();
 engine.world.gravity.y = 0;

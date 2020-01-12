@@ -183,7 +183,7 @@ addMouseControl();
 const flashWall = (wall) => {
 
 
-    wall.render.strokeStyle = 'red';
+    wall.render.strokeStyle = 'rgb(127,127,127)';
     setTimeout(() => {
         wall.render.strokeStyle = wallStroke;
     }, 100);
@@ -197,14 +197,13 @@ Events.on(engine, 'collisionStart', event => {
     event.pairs.forEach((collision) => {
         const labels = ['Ball', 'Goal'];
         const wallCollision = ['Ball', 'Wall'];
+
+        // if collision with wall
         if(wallCollision.includes(collision.bodyA.label) && wallCollision.includes(collision.bodyB.label)) {
-
             flashWall(collision.bodyA);
-
         }
         // if collision with goal
         if(labels.includes(collision.bodyA.label) && labels.includes(collision.bodyB.label) && !hasWon) {
-
             onWin();
         }
     });
@@ -220,14 +219,11 @@ const initBall = () => {
         }
     );
     World.add(world, goal);
-    const ball = Bodies.circle(unitLengthX / 2, unitLengthY / 2, unitLengthX / 4, { restitution: 0.5, label: "Ball", render: { fillStyle: ballFill, strokeStyle: ballStroke, lineWidth: ballStrokeWidth } });
+    const ball = Bodies.circle(unitLengthX / 2, unitLengthY / 2, unitLengthX / 4, { restitution: 0.8, label: "Ball", render: { fillStyle: ballFill, strokeStyle: ballStroke, lineWidth: ballStrokeWidth } });
     World.add(world, ball);
 
-
-
-
     document.addEventListener('keydown', event => {
-        console.log(ballVelocity);
+
 
         const { x, y } = ball.velocity;
 
@@ -260,13 +256,28 @@ const rotateBody = (body) => {
 const updateScore = (score) => {
     scoreButton.innerText = `SCORE: ${score}`;
 }
+
+const playRandomWinAnimation = () => {
+    if(Math.random > 0.5) {
+        engine.world.gravity.y = 0.005;
+    } else {
+        world.bodies.forEach((body) => {
+            if(body.label === 'Ball') {
+                body.restitution = 1.5;
+            }
+        })
+    }
+
+
+}
 const onWin = () => {
-    userScore += 1;
+    // increment score by current difficulty
+    userScore += currDifficulty;
     updateScore(userScore);
     console.log('YOU WIN!!');
     hasWon = true;
+    playRandomWinAnimation();
 
-    engine.world.gravity.y = 0.005;
     world.bodies.forEach((body) => {
 
         // FLASH GOAL ON COLLISION
@@ -287,9 +298,11 @@ const onWin = () => {
 
         if(body.label === 'Wall') {
             Body.setStatic(body, false);
-            winBox.classList.remove('hidden');
-            randWinText();
+
         }
+
+        winBox.classList.remove('hidden');
+        randWinText();
     });
 
 }
@@ -326,17 +339,18 @@ const reset = () => {
 }
 
 const makeHarder = () => {
-    cellsHorizontal += 1;
-    cellsVertical += 1;
-
-    if(cellsHorizontal === 10 && cellsVertical === 10) {
+    cellsHorizontal += 2;
+    cellsVertical += 2;
+    currDifficulty++
+    if(cellsHorizontal === 20 && cellsVertical === 20) {
+        currDifficulty = 1;
         cellsHorizontal = 4;
         cellsVertical = 4;
     }
     unitLengthX = width / cellsHorizontal;
     unitLengthY = height / cellsVertical;
 
-    console.log(cellsHorizontal, cellsVertical);
+    harderButton.innerText = `DIFFICULTY: ${currDifficulty}`
     reset();
 };
 
@@ -349,7 +363,8 @@ const makeHarder = () => {
 newButton.addEventListener('click', reset);
 harderButton.addEventListener('click', makeHarder);
 fasterButton.addEventListener('click', () => {
-    if(ballVelocity < 5) { ballVelocity = (ballVelocity + 1) % 5; }
+    if(ballVelocity < 6) { ballVelocity = (ballVelocity + 1) % 6; }
+    if(ballVelocity == 0) { ballVelocity = 1 }
     fasterButton.innerText = `VELOCITY ${ballVelocity}`;
 });
 
@@ -358,6 +373,10 @@ closeButton.addEventListener('click', () => {
 });
 
 // SHOW INSTRUCTIONS
+
+bannerText.addEventListener("mouseover", () => bannerText.innerText = "BY L.P 2020");
+bannerText.addEventListener("mouseout", () => bannerText.innerText = " MAZE MALAISE");
+
 bannerText.innerText = "W A S D >> MOVE";
 
 setTimeout(() => {
