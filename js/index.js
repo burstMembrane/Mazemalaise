@@ -159,24 +159,15 @@ const stepThoughCell = (row, column, grid, horizontals, verticals) => {
 // allow mouse control
 const addMouseControl = () => {
     // add mouse control
-
-
-}
-
-const logForTenSeconds = (data) => {
-
-
-    const logInterval = setInterval(() => {
-        console.log(data);
-    }, 10000);
-
-    setTimeout(() => {
-
-        clearInterval(logInterval);
-    })
-
+    const mouse = Mouse.create(cnv);
+    const options = {
+        mouse: mouse
+    };
+    mConstraint = MouseConstraint.create(engine, options);
+    World.add(world, mConstraint);
 
 }
+
 addMouseControl();
 
 

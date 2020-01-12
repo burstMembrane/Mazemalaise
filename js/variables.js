@@ -64,26 +64,3 @@ let { width, height, cellsHorizontal, cellsVertical, unitLengthX, unitLengthY } 
 // start renderer
 Render.run(render);
 Runner.run(Runner.create(), engine);
-
-
-let mouse = Mouse.create(render.canvas),
-    mouseConstraint = MouseConstraint.create(engine, {
-        mouse: mouse,
-        constraint: {
-            stiffness: 0.2,
-            render: {
-                visible: false
-            }
-        }
-    });
-
-World.add(world, mouseConstraint);
-
-// keep the mouse in sync with rendering
-render.mouse = mouse;
-Events.on(mouseConstraint, "startdrag", (event) => {
-    if(event.body.label === "Ball") {
-        console.log(event);
-    }
-
-})
