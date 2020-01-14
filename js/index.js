@@ -11,8 +11,6 @@ const makeWalls = (w, h, wallWidth = 2) => {
     World.add(world, [wallL, wallR, floor, ceiling]);
 };
 
-
-
 // =============== //
 // GRID GENERATION //
 // =============== //
@@ -33,8 +31,6 @@ const shuffle = (arr) => {
 
     return arr;
 };
-
-
 
 const newMaze = () => {
 
@@ -90,9 +86,10 @@ const newMaze = () => {
 
 const findGoal = () => {
     let goalBody;
-
+    // step through bodies in the world
     world.bodies.forEach((body) => {
         if(body.label === 'Goal') {
+            // if it is a goal, save as variable
             goalBody = body;
 
 
@@ -101,6 +98,7 @@ const findGoal = () => {
     });
 
     if(goalBody) {
+        // return body object to global scope
         return goalBody;
     }
 }
@@ -245,7 +243,18 @@ const rotateBody = (body) => {
 }
 
 const updateScore = (score) => {
-    scoreButton.innerText = `SCORE: ${score}`;
+
+    if(storageAvailable('localStorage')) {
+        localStorage.userScore = score;
+        scoreButton.innerText = `SCORE: ${localStorage.userScore}`;
+        // Yippee! We can use localStorage awesomeness
+    } else {
+        scoreButton.innerText = `SCORE: ${score}`;
+        // Too bad, no localStorage for us
+    }
+
+
+
 }
 
 const playRandomWinAnimation = () => {
@@ -263,8 +272,13 @@ const playRandomWinAnimation = () => {
 }
 const onWin = () => {
     // increment score by current difficulty
-    userScore += currDifficulty;
-    updateScore(userScore);
+    if(!localStorage.userScore) {
+        userScore += currDifficulty;
+        updateScore(userScore);
+    } else {
+        localStorage.userScore = parseInt(localStorage.userScore) + currDifficulty;
+        updateScore(localStorage.userScore)
+    }
     console.log('YOU WIN!!');
     hasWon = true;
     playRandomWinAnimation();
@@ -378,5 +392,10 @@ setTimeout(() => {
 
 
 // make the walls
-updateScore(0);
+
+if(localStorage.userScore) {
+    updateScore(localStorage.userScore);
+} else { updateScore(0) };
+
+
 reset();
